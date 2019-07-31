@@ -1,0 +1,11 @@
+#django-autoslug
+dcg-autoslug
+django-select2
+# NOTE: django-select2 requires that your site has a cache backend installed.
+django-formtools
+numpy
+graphviz
+# Note: still requires graphviz to be installed on the system
+
+django-markuphelpers
+django-dept-classes

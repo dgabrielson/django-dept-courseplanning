@@ -1,0 +1,59 @@
+{% extends 'admin/app_index.html' %}
+{% load i18n static courseplanning_tags %}
+
+{# ########################################################## #}
+
+{% block sidebar %}
+{{ block.super }}
+
+<div id="content-related">
+    <div class="module">
+        <h2>{% trans 'Application Links' %}</h2>
+
+        <h3>{% trans 'Reports & Summaries' %}</h3>
+
+            <ul class="actionlist">
+                {% if perms.course_planning.change_teachingprofile %}
+                    <li>
+                        <a href="{% url 'admin:teachingprofile_summary' %}" class="viewsitelink">
+                            Teaching Preferences Summary
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'admin:teachingprofile_student_load_report' %}" class="viewsitelink">
+                            Student Load Report
+                        </a>
+                    </li>
+                {% endif %}
+            </ul>
+        {% upcoming_sessions as session_list %}
+        {% if session_list and perms.course_planning.change_draftschedulesession %}
+            <h3>Upcoming Schedule Sessions</h3>
+            <ul class="actionlist">
+                {% for session in session_list %}
+                    <li>
+                        <a class="viewsitelink" href="{% url 'admin:course_planning_draftschedulesession_change' session.pk %}">
+                            {{ session }}
+                        </a>
+                        &rsaquo;
+                        <a class="viewsitelink" href="{% url 'admin:draftschedulesession_worksheet' pk=session.pk %}">
+                            Worksheet
+                        </a>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+        <h3>Documenation</h3>
+        <ul class="actionlist">
+                <li>
+                    <a href="{% url 'admin:course_planning_draftschedulesession_howto' %}" class="viewsitelink">
+                        How to use the scheduler
+                    </a>
+                </li>
+        </ul>
+    </div>
+</div>
+
+{% endblock %}
+
+{# ########################################################## #}

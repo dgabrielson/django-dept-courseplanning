@@ -1,0 +1,30 @@
+{% load dept_classes %}{# program.courseprograminfo_set.active #}
+digraph program_detail {
+    {# nodes #}
+    bgcolor = "transparent";
+    graph [fontname = "helvetica", label=<<B>{{ program }} Program</B>>, labelloc=t, fontsize=24];
+    node [fontname = "helvetica"];
+    edge [fontname = "helvetica"];
+    tooltip = "";
+    rankdir = LR;
+    {% for info in program.courseprograminfo_set.active %}
+        {% with course=info.course.course %}
+            "{{ course.label }}" [label=<<B>{{ course.label }}</B>>, URL="{{ course.get_absolute_url }}", tooltip="{{ course.name }}", style=filled, fillcolor="#fdc086"];
+            {% regroup course.prerequisite_set.active by equiv_group as equivs %}
+            {% for equiv in equivs %}
+                {% for prereq, prev in equiv.list|list_with_prev %}
+                    {% if not prev %}
+                        {% if not prereq.course %}"{{ prereq }}" [label=<{{ prereq }}{% if prereq.minimum_grade %}<BR/><FONT POINT-SIZE="10">{{ prereq.minimum_grade }} or better</FONT>{% endif %}>, shape={% if prereq.corequisite %}polygon, sides=6{% elif prereq.optional %}egg{% elif prereq.preferred %}Mrecord{% else %}box{% endif %}, style=filled, fixedsize=false, fillcolor={% if prereq.corequisite and prereq.preferred %}"#386cb0"{% elif prereq.optional %}"#bf5b17"{% elif prereq.preferred %}"#7fc97f"{% else %}"#ffff99"{% endif %}, {% if prereq.get_absolute_url %}URL="{{ prereq.get_absolute_url }}", {% endif %}{% if prereq.requisite.get_note %}tooltip="{{ prereq.requisite.get_note }}", {% endif %}];{% endif %}
+                        {% if prev is None %}
+                            {% if prereq.corequisite %}"{{ prereq }}" -> "{{ course.label }}"{% else %}"{{ prereq }}" -> "{{ course.label }}"{% endif %}{% if prereq.corequisite %}[style="dashed"]{% elif prereq.optional %}[style=dashed, label="optional"]{% endif %};
+                        {% else %}
+                            "{{ prereq }}" -> "{{ prev }}" [style=dotted, label=" or"];
+                        {% endif %}
+                        {% if prereq.corequisite and prereq.recommended %}{ rank=same; "{{ course.label }}"; "{{ prereq }}"; };{% endif %}
+                    {% endif %}
+                {% endfor %}{# prereq, prev #}
+            {% endfor %}{# equivs #}
+        {% endwith %}{# course #}
+    {% endfor %}{# info #}
+
+}

@@ -1,0 +1,126 @@
+{% extends "admin/change_form.html" %}
+{% load i18n static %}
+
+{% block object-tools-items %}
+{% url 'admin:draftschedulesession_worksheet' pk=original.pk as link_url %}
+{% if link_url %}
+    <li>
+        <a href="{{ link_url }}" class="viewsitelink">
+            Scheduling worksheet
+        </a>
+    </li>
+{% endif %}
+
+
+{% url 'admin:draftschedulesession_export_spreadsheet' pk=original.pk as link_url %}
+{% if link_url %}
+    <li>
+        <a href="{{ link_url }}" class="viewsitelink">
+            Export spreadsheet
+        </a>
+    </li>
+{% endif %}
+
+
+{{ block.super }}
+{% endblock %}
+
+
+{% block footer %}
+<div id="footer">
+    <script>
+        function busy_action()
+        {
+            var btn_list = document.getElementsByClassName('show-busy-button');
+            var busy_list = document.getElementsByClassName('busy-throbber');
+            var i;
+
+            for (i = 0; i < btn_list.length; i++) {
+                btn_list[i].style.display = "none";
+
+            }
+            busy_list[0].style.display = "block";
+
+        };
+    </script>
+
+    <ul class="actionlist">
+        {% if not original.initialized %}
+            {% url 'admin:draftschedulesession_init_current' pk=original.pk as link_url %}
+            {% if link_url and original.current_actual_sections.count > 0 %}
+                <li style="list-style-type:none;">
+                    <span class="busy-throbber" style="text-indent:0em;display:none"><img src="{% static 'img/busy-loader.gif' %}" alt="progress indicator"></span>
+                    <span class="show-busy-button">
+                        <a href="{{ link_url }}" onclick="busy_action();" class="changelink">
+                            <button class="button" style="font-size:13px;">
+                                Initialize schedule
+                            </button>
+                        </a>
+                        from actual course data for this time period ({{ original.current_actual_sections.count }} sections)
+                    </span>
+                </li>
+            {% endif %}
+            {% url 'admin:draftschedulesession_init_prev' pk=original.pk as link_url %}
+            {% if link_url and original.prev_actual_sections.count > 0 %}
+                <li style="list-style-type:none;">
+                    <span class="busy-throbber" style="text-indent:0em;display:none"><img src="{% static 'img/busy-loader.gif' %}" alt="progress indicator"></span>
+                    <span class="show-busy-button">
+                        <a href="{{ link_url }}" onclick="busy_action();" class="changelink">
+                            <button class="button" style="font-size:13px;">
+                                Initialize schedule
+                            </button>
+                        </a>
+                        from actual course data for this time period <em>one year previous</em> ({{ original.prev_actual_sections.count }} sections)
+                    </span>
+                </li>
+            {% endif %}
+            {% url 'admin:draftschedulesession_init_twoyears' pk=original.pk as link_url %}
+            {% if link_url and original.two_years_ago_actual_sections.count > 0 %}
+                <li style="list-style-type:none;">
+                    <span class="busy-throbber" style="text-indent:0em;display:none"><img src="{% static 'img/busy-loader.gif' %}" alt="progress indicator"></span>
+                    <span class="show-busy-button">
+                        <a href="{{ link_url }}" onclick="busy_action();" class="changelink">
+                            <button class="button" style="font-size:13px;">
+                                Initialize schedule
+                            </button>
+                        </a>
+                        from actual course data for this time period <em>two years previous</em> ({{ original.prev_actual_sections.count }} sections)
+                    </span>
+                </li>
+            {% endif %}
+            {% comment %}
+            <li style="list-style-type:none;">
+                Initialize schedule (from last years draft schedule) &rarr;
+            </li>
+            {% endcomment %}
+        {% else %}
+            {% url 'admin:draftschedulesession_auto_schedule' pk=original.pk as link_url %}
+            {% if link_url %}
+                <li style="list-style-type:none;">
+                    <script>
+                        function busy_action()
+                        {
+                            var btn = document.getElementById('show-busy-button');
+                            var busy = document.getElementById('busy-throbber');
+
+                            btn.style.display = "none";
+                            busy.style.display = "block";
+                        };
+                    </script>
+                    <span id="busy-throbber" style="text-indent:0em;display:none"><img src="{% static 'img/busy-loader.gif' %}" alt="progress indicator"></span>
+                    <span id="show-busy-button">
+                        <a href="{{ link_url }}" onclick="busy_action();" class="editlink">
+                            <button class="button" style="font-size:13px;">
+                                Auto Schedule
+                            </button>
+                        </a>
+                        &nbsp; unassigned courses based
+                        on teaching preferences.
+                    </span>
+                </li>
+            {% endif %}
+    {% endif %}
+</ul>
+
+    </div>
+{% endblock %}

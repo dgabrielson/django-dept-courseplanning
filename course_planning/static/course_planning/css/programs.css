@@ -1,0 +1,96 @@
+.runs-F,.runs-W,.runs-S,.runs-FW,.runs-OF,.runs-OW,.runs-EF,.runs-EW,.runs-Empty,.has-lab {
+	color: black;
+	border-radius:8px;
+	text-align: center;
+	width: 10px;
+}
+
+.runs-F {
+	background-color: #E01B1B;
+}
+
+.runs-W {
+	background-color: #AAABDA;
+}
+
+.runs-S {
+	background-color: #FFFF99;
+}
+
+.runs-FW {
+	background-color: #B0B0B0;
+}
+
+.runs-OF {
+	background-color: #E0491B;
+}
+
+.runs-OW {
+	background-color: #80A6D2;
+}
+
+.runs-EF {
+	background-color: #E0771B;
+}
+
+.runs-EW {
+	background-color: #9999CC;
+}
+
+.has-lab {
+	background-color: #B0B0B0;
+}
+
+.runs-OFW,.runs-EFW {
+	color: black;
+	border-radius:8px;
+	text-align: center;
+	width: 20px;
+}
+
+.runs-OFW {
+	background-color: #9999CC;
+}
+
+.runs-EFW {
+	background-color: #9999CC;
+}
+
+.program-table {
+	width: 90%;
+}
+
+.program-table tbody tr:hover {
+	color: #339;
+	background: #d0dafd;
+}
+
+.program-table .course-label {
+	width: 5.5em;
+}
+
+.program-table .course-name {
+	/* width: unset; */
+	width: 62%;
+}
+
+@media (max-width: 500px) {
+	.program-table .course-name {
+		display:none;
+	}
+}
+
+/* required course */
+.constraint-r .course {
+	font-weight: 600;
+}
+
+/* recommended course */
+.constraint-c .course {
+	font-style: italic;
+}
+
+/* optional course */
+.constraint-o .course {
+
+}

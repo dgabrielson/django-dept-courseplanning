@@ -1,0 +1,70 @@
+{% extends 'course_planning/program_list.html' %}
+{% load static markup %}
+
+{# ########################################### #}
+
+{% block html_head_courseplanning_extra %}
+    <link type="text/css" rel="stylesheet" href="{% static 'course_planning/css/programs.css' %}">
+{% endblock %}
+
+{# ########################################### #}
+
+{% block head_subtitle %}{{ object }} program{% endblock %}
+{% block title %}{{ object }} program{% endblock %}
+
+{# ########################################### #}
+
+{% block page_breadcrumbs %}
+    <span class="divider">&gt;</span>
+    {{ object }}
+{% endblock page_breadcrumbs %}
+
+{# ########################################### #}
+
+{% block courseplanning_content %}
+    {% if program.description %}
+        {{ program.description|restructuredtext }}
+    {% else %}
+        <p>
+        Click on a course to see details as well as past midterm and final examinations.
+        </p>
+    {% endif %}
+    {% include 'course_planning/includes/program_common.html' %}
+    {% with course=program.courseprograminfo_set.active.0.course.course %}
+        {% if course.prerequisite_set.active or course.reverse_prerequisites %}
+            <ul class="pagenav">
+                <li>
+                    <a href="{% url 'courseplanning-program-graph' slug=program.slug %}">
+                        Program graph
+                    </a>
+                </li>
+            </ul>
+        {% endif %}
+    {% endwith %}
+    {% if program.courseprograminfo_set.required.exists %}
+        <p class="constraint-r">
+            <span class="course">Required</span> courses appear <span class="course">like this</span>.
+        </p>
+    {% endif %}
+    {% if program.courseprograminfo_set.recommended.exists %}
+        <p class="constraint-c">
+            <span class="course">Recommended</span> courses appear <span class="course">like this</span>.
+        </p>
+    {% endif %}
+    {% if program.courseprograminfo_set.required.exists or program.courseprograminfo_set.recommended.exists %}
+        {% if program.courseprograminfo_set.optional.exists %}
+        <p class="constraint-o">
+            <span class="course">Optional</span> courses appear <span class="course">like this</span>.
+        </p>
+        {% endif %}
+    {% endif %}
+
+    {% include 'course_planning/includes/course_program_info.html' %}
+{% endblock %}
+
+{# ########################################### #}
+
+{% block courseplanning_extra_content %}
+{% endblock %}
+
+{# ########################################### #}

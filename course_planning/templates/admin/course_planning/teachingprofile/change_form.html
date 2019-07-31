@@ -1,0 +1,13 @@
+{% extends "admin/change_form.html" %}
+{% load i18n static %}
+
+{% block object-tools-items %}
+    {% if perms.people.change_person and original.person_id %}
+        <li>
+            <a href="{% url 'admin:people_person_change' original.person_id %}" class="viewsitelink">
+                Person Record
+            </a>
+        </li>
+    {% endif %}
+{{ block.super }}
+{% endblock %}

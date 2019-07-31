@@ -1,0 +1,188 @@
+{% extends 'admin/change_form.html' %}
+{% load i18n admin_modify %}
+{% load static %}
+
+{# ########################################### #}
+
+{% block title %}How to use the scheduler{% endblock %}
+
+{# ########################################### #}
+
+
+{% block content %}
+<div id="content-main">
+    {% block object-tools %}
+        <ul class="object-tools">
+            {% block object-tools-items %}
+            {% endblock %}
+        </ul>
+    {% endblock %}
+
+    <h2>Make sure that all teaching faculty have teaching profiles</h2>
+
+    <a href="{% url 'admin:course_planning_teachingprofile_changelist' %}">
+        Home › Programs &amp; Course Info › Teaching profiles
+    </a>
+
+    <ul>
+        <li>
+            Make sure the person associated with the teaching profile
+            has a username – login is required by each teaching
+            faculty member to view or update their teaching profile.
+        </li>
+    </ul>
+
+    <h2>Setup additional teaching survey questions</h2>
+
+    <a href="{% url 'admin:course_planning_teachingsurveyquestion_changelist' %}">
+        Home › Programs &amp; Course Info › Teaching survey questions
+    </a>
+
+    <ul>
+        <li>
+            Additional survey questions are meant to provide
+            further information regrading teaching.
+        </li>
+        <li>
+            Example questions are: <br>
+            &ldquo;Are there any other particulars you would like us to consider when assigning your teaching for this upcoming year?&rdquo;<br>
+            &ldquo;Are there any graduate courses or topics courses you would like to propose?&rdquo;
+        </li>
+    </ul>
+
+
+    <h2>Setup programs for scheduling</h2>
+
+    <a href="{% url 'admin:course_planning_program_changelist' %}">
+        Home › Programs &amp; Course Info › Programs
+    </a>
+
+    <ul>
+        <li>
+            Programs that are used for scheduling are
+            groups of courses that teaching faculty can rank
+            their preferences for.
+        </li>
+        <li>
+            Each program is one step in the teaching profile,
+            so it's a good idea to have multiple programs for
+            scheduling.
+        </li>
+        <li>
+            All of the programs for scheduling should cover
+            the entire undergraduate program.<br>
+            Departments may or may not schedule graduate courses
+            at the same time.
+        </li>
+    </ul>
+
+    <h2>Distribute the teaching survey link</h2>
+
+    <a href="{% url 'courseplanning-teaching-profile' %}">
+        {{ request.scheme }}://{{ request.get_host }}{% url 'courseplanning-teaching-profile' %}
+    </a>
+
+    <ul>
+        <li>
+            Everybody gets the same url, but login is required
+            to identify the profile being updated.
+        </li>
+    </ul>
+
+
+    <h2>Set up a draft schedule</h2>
+
+    <a href="{% url 'admin:course_planning_draftschedulesession_add' %}">
+        Home › Programs &amp; Course Info › Draft schedule sessions > Add
+    </a>
+
+    <ul>
+        <li>
+            Start by entering a name and the start and end
+            dates for the draft schedule.
+        </li>
+        <li>
+            At the moment, the scheduler is designed to allow scheduling up to
+            one year with a single draft schedule – specifing a longer time
+            period may have unpredicatible results.
+        <li>
+            Save using the &ldquo;Save and continue editing&rdquo; button.
+        </li>
+        <li>
+            Intialize the schedule using one of the availabe options.
+        </li>
+        <li>
+            Depending on the courses available, you may only have one
+            available option for initalizing a draft schedule.
+            This is normal.
+        </li>
+        <li>
+            The &ldquo;Auto Schedule&rdquo; option is provided
+            as a convience only – always review using the
+            scheduling worksheet.
+    </ul>
+
+
+
+    <h2>Edit the draft sections</h2>
+
+    <a href="{% url 'admin:course_planning_draftsection_changelist' %}">
+        Home › Programs &amp; Course Info › Draft sections
+    </a>
+
+    <ul>
+        <li>
+            Using the filters, select the draft schedule and possibly
+            the term you want to focus on.
+        </li>
+        <li>
+            Ensure that there are the desired courses and sections.
+        </li>
+        <li>
+            You will need to manually update draft sections for courses
+            that only run every other year (or irregularly).
+        </li>
+
+    </ul>
+
+
+
+    <h2>Use the scheduling worksheet</h2>
+
+    <a href="{% url 'admin:course_planning_draftschedulesession_changelist' %}">
+        Home › Programs &amp; Course Info › Draft schedule sections
+    </a>
+
+    <ul>
+        <li>
+            Using the link above, click the &ldquo;Worksheet&rdquo; button.
+        </li>
+        <li>
+            A large screen is helpful when using the worksheet.
+        </li>
+        <li>
+            Clicking the <img src="/media/img/icons/info.svg" alt="Info"> icon
+            beside a course name will show a list of instructor preferences
+            for that course.
+        </li>
+        <li>
+            Clicking an instructor from the right sidebar will show
+            that instructors preferences.
+        </li>
+        <li>
+            As courses are assigned instructors (and timeslots)
+            scores and notes are updated, as is instructor load
+            information in the right sidebar.
+        </li>
+        <li>
+            For each assignment, higher scores represent more desireable
+            options.
+        </li>
+    </ul>
+
+
+</div>
+{% endblock %}
+
+
+{# ########################################### #}

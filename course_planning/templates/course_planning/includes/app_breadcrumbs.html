@@ -1,0 +1,9 @@
+
+{% url 'courseplanning-program-list' as app_top_url %}
+{% if app_top_url %}
+    {% if app_top_url != request.path %}
+        <a href="{{ app_top_url }}">Programs</a>
+    {% else %}
+        Programs
+    {% endif %}
+{% endif %}

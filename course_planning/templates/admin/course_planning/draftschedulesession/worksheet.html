@@ -1,0 +1,410 @@
+{% extends 'admin/change_form.html' %}
+{% load i18n admin_urls static admin_modify %}
+
+{# ########################################### #}
+
+{% block title %}{{ page_header }}{% endblock %}
+
+{# ########################################### #}
+
+{% block extrahead %}{{ block.super }}
+
+<script type="text/javascript" src="{% static 'js/jquery-3.2.1.min.js' %}"></script>
+<!-- form media -->
+{{ form.media }}
+{{ formset.media }}
+
+<script type="text/javascript" src="/static/admin/js/vendor/jquery/jquery.js"></script>
+<script type="text/javascript" src="/static/admin/js/jquery.init.js"></script>
+<script type="text/javascript" src="/static/admin/js/core.js"></script>
+<script type="text/javascript" src="/static/admin/js/admin/RelatedObjectLookups.js"></script>
+
+<script language="javascript" type="text/javascript">
+
+{# TODO: be more adaptive to django settings #}
+{# https://docs.djangoproject.com/en/2.0/ref/csrf/ #}
+
+function getCookie(name) {
+    var cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        var cookies = document.cookie.split(';');
+        for (var i = 0; i < cookies.length; i++) {
+            var cookie = jQuery.trim(cookies[i]);
+            // Does this cookie string begin with the name we want?
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+
+function set_instructor_loads(data)
+{
+    if (data.instructor_id) {
+        if (data.remaining_load || data.remaining_load == 0) {
+            $('#remaining-load-' + data.instructor_id).text(data.remaining_load);
+        }
+        if (data.remaining_term_loads) {
+            $('#remaining-term-load-' + data.instructor_id).text(data.remaining_term_loads);
+        }
+    }
+}
+
+function on_success(data)
+{
+    if (data.section_id) {
+        if (data.score || data.score == 0) {
+            $('#score-' + data.section_id).text(data.score);
+        }
+        else {
+            $('#score-' + data.section_id).text('');
+        }
+        if (data.notes) {
+            $('#notes-' + data.section_id).text(data.notes);
+        }
+        else {
+            $('#notes-' + data.section_id).text('');
+        }
+    }
+    set_instructor_loads(data, true);
+    if (data.old_instructor_id) {
+        get_instructor_loads(data.old_instructor_id);
+    }
+    var idx;
+    var other_id;
+    for (var idx=0; idx<data.additional_sections.length; idx++) {
+        other_id = data.additional_sections[idx];
+        load_section_extra(other_id, false);
+    }
+    if (data.message) {
+        alert(data.message);
+    }
+}
+
+function on_success_section_save(data) {
+    on_success(data);
+    var idx;
+    var other_id;
+    for (var idx=0; idx<data.additional_sections.length; idx++) {
+        other_id = data.additional_sections[idx];
+        load_section_extra(other_id, false);
+    }
+}
+
+
+function on_error(data)
+{
+    if (data.message) {
+        alert(data.message);
+    }
+    else {
+        alert("Unknown failure, sorry.")
+    }
+}
+
+
+function save_section(section_pk, instructor_pk, timeslot_pk)
+{
+    $.ajax({
+        url:'{% url "admin:draftschedulesession_ajax_save_section" %}',
+        method:'POST',
+        data:{
+            section_pk: section_pk,
+            instructor_pk: instructor_pk,
+            timeslot_pk: timeslot_pk,
+            csrfmiddlewaretoken: getCookie('csrftoken')
+        },
+        success: on_success_section_save,
+        error: on_error
+    });
+}
+
+function load_section_extra(section_pk, cascade)
+{
+    $.ajax({
+        url: '{% url "admin:draftschedulesession_ajax_load_section_extra" %}',
+        method: 'POST',
+        data:{
+            section_pk: section_pk,
+            csrfmiddlewaretoken: getCookie('csrftoken')
+        },
+        success: on_success,
+        error: on_error
+    });
+}
+
+function get_instructor_loads(instructor_id)
+{
+    $.ajax({
+        url: '{% url "admin:draftschedulesession_ajax_get_instructor_loads" %}',
+        method: 'POST',
+        data:{
+            instructor_id: instructor_id,
+            session_id: '{{ object.pk }}',
+            csrfmiddlewaretoken: getCookie('csrftoken')
+        },
+        success: set_instructor_loads,
+        error: on_error
+    });
+
+}
+
+{% comment %}
+// Usage:
+//     $("#remaining-load-info").scrollTo("#instr-" + data.instructor_id + "-loads", 100);
+// Source:
+//     https://stackoverflow.com/a/18927969
+// Note:
+//     Currently the load effect seems to distracting to use this.
+
+$.fn.scrollTo = function(elem, speed) {
+    $(this).animate({
+        scrollTop:  $(this).scrollTop() - $(this).offset().top + $(elem).offset().top
+    }, speed == undefined ? 1000 : speed);
+    return this;
+};
+{% endcomment %}
+
+// source: http://jsfiddle.net/0zxxrjqj/
+function sticky_relocate() {
+    var window_top = $(window).scrollTop();
+    var div_top = $('#content-anchor').offset().top;
+    if (window_top > div_top) {
+        $('#remaining-load-info').addClass('stick');
+    } else {
+        $('#remaining-load-info').removeClass('stick');
+    }
+}
+
+$(function () {
+    $(window).scroll(sticky_relocate);
+    sticky_relocate();
+});
+
+
+
+</script>
+
+<style>
+
+div#remaining-load-info {
+    position: absolute;
+    overflow-y: scroll;
+    padding-right: 8px;
+    border: 1px solid black;
+    max-height: 99vh;
+    margin-bottom: 0;
+    padding-bottom: 2;
+    background-color: #eee;
+    right: 0;
+    top: 100px;
+}
+
+#remaining-load-info.stick {
+    position: fixed;
+    top: 0;
+}
+
+</style>
+
+{% endblock %}
+
+
+{# ########################################### #}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+<a href="{% url 'admin:index' %}">{% trans 'Home' %}</a>
+&rsaquo; <a href="{% url 'admin:app_list' app_label=opts.app_label %}">{{ opts.app_config.verbose_name }}</a>
+&rsaquo; <a href="{% url opts|admin_urlname:'changelist' %}">{{ opts.verbose_name_plural|capfirst }}</a>
+{% if original %}
+    &rsaquo; <a href="{{ original.admin_change_link }}">{{ original|truncatewords:"18" }}</a>
+{% endif %}
+&rsaquo; Scheduling worksheet
+</div>
+<div id="content-anchor"></div>
+{% endblock %}
+
+{# ########################################### #}
+
+
+{% block content %}
+<h1>Scheduling worksheet</h1>
+<div id="content-main">
+{% block object-tools %}
+  <ul class="object-tools">
+    {% block object-tools-items %}
+    {% endblock %}
+  </ul>
+{% endblock %}
+
+
+<!-- main content -->
+<form action="." method="post">
+
+{% comment %}
+    <div class="submit-row">
+    <input type="submit" value="Auto Fill Schedule" class="default" name="_save" />
+    </div>
+{% endcomment %}
+
+{{ form }}
+
+{{ formset.management_form }}
+<table id="{{ formset.prefix }}-formset" class="table-form formset">
+    <thead>
+        {% if formset_header %}
+            <tr class="table-form-row-header">
+                <th colspan="{{ formset.empty_form.visible_fields|length }}">
+                    {{ formset_header }}
+                </th>
+            </tr>
+        {% endif %}
+        {% if not formset.is_valid and formset.non_form_errors%}
+            <tr class="form-errors">
+                <td colspan="{{ formset.empty_form.visible_fields|length }}">
+                    <ul class=errorlist>
+                    {% for error in formset.non_form_errors %}
+                        <li>
+                            {{ error }}
+                        </li>
+                    {% endfor %}
+                    </ul>
+                </td>
+            </tr>
+        {% endif %}
+        <tr class="table-formset-header">
+            {% for field in formset.empty_form.visible_fields %}
+                <th>
+                    <label class="tabular-formset-label{% if not field.field.required %} optional{% endif %}">
+                        {{ field.label }}
+                    </label>
+                </th>
+            {% endfor %}
+            <th>
+                <label>
+                    Score
+                </label>
+            </th>
+            <th>
+                <label>
+                    Notes
+                </label>
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for form in formset.forms %}
+            {% for field in form.hidden_fields %}{{ field }}{% endfor %}
+
+            <tr id="{{ form.prefix }}-row">
+                {% for field in form.visible_fields %}
+                    <td{% if not form.instance.file %} class="row-midrule-after"{% endif %}{% if field.name == 'course' %} title="{{ form.instance.course.name }}"{% endif %}>
+                    <!-- field.name: {{ field.name }} -->
+                    {% if field.name == 'course' %}
+                        <div class="related-widget-wrapper">
+                            {{ form.instance.course.label }}
+                            {% if form.instance.course.courseteachingpreference_set.exists %}
+                            &nbsp;<a class="related-widget-wrapper-link add-related" id="info_id_{{ form.instance.course.slug }}_{{ form.instance.pk }}"
+                                href="{% url 'admin:draftschedulesession_course_info' slug=form.instance.course.slug %}?_popup=1"
+                                title="{% blocktrans %}Instructor preferences{% endblocktrans %}">
+                                <img src="{% static 'img/icons/info.svg' %}" alt="{% trans 'Info' %}"/>
+                            </a>
+                            {% endif %}
+                        </div>
+                    {% elif field.name == 'verbose_name' %}
+                        {{ form.instance.verbose_name }}
+                    {% elif field.name == 'semester' %}
+                        {{ form.instance.get_semester_display }}
+                    {% else %}
+                        {% if field.errors %}
+                            <ul for="{{ field.auto_id }}" class="errorlist" id="errors-{{ field.html_name }}">
+                                {% for error in field.errors %}
+                                    <li>{{ error }}
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                        {{ field }}
+                    {% endif %}
+                    </td>
+                {% endfor %}
+                <td id="score-{{ form.instance.pk }}"></td>
+                <td id="notes-{{ form.instance.pk }}"></td>
+            </tr>
+
+<script language="javascript" type="text/javascript">
+$('#id_{{ form.prefix }}-instructor, #id_{{ form.prefix }}-timeslot').on('change', function() {
+    var section_id = '{{ form.instance.pk }}';
+    var instructor_id = $('#id_{{ form.prefix }}-instructor').val();
+    var timeslot_id = $('#id_{{ form.prefix }}-timeslot').val();
+
+    save_section(section_id, instructor_id, timeslot_id);
+});
+$( load_section_extra('{{ form.instance.pk }}', false) );
+</script>
+
+        {% endfor %}
+        {% with formset.empty_form as form %}
+        {% for field in form.hidden_fields %}{{ field }}{% endfor %}
+        <tr id="id_{{ formset.prefix }}_template" style="display:none;">
+            {% for field in form.visible_fields %}
+                <td{% if not form.instance.file %} class="row-midrule-after"{% endif %}>
+                    {% if field.errors %}
+                        <ul for="{{ field.auto_id }}" class="errorlist" id="errors-{{ field.html_name }}">
+                            {% for error in field.errors %}
+                                <li>{{ error }}
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                    {{ field }}
+                </td>
+            {% endfor %}
+        </tr>
+        {% endwith %}
+    </tbody>
+</table>
+
+<div id="remaining-load-info" class="absolute-right">
+    <table>
+    {% for profile in teachingprofile_list %}
+        <tr class="instructor-load" id="instr-{{ profile.pk }}-loads">
+            <th>
+                <a class="related-widget-wrapper-link add-related" id="instructor_info_id_{{ profile.pk }}"
+                    href="{% url 'admin:draftschedulesession_instructor_info' session_id=object.pk pk=profile.pk %}?_popup=1"
+                    title="{% blocktrans %}Instructor details{% endblocktrans %}">
+                    {{ profile }}
+                </a>
+            </th>
+            <td class="total-load" id="remaining-load-{{ profile.pk }}">
+            </td>
+            <td class="term-load" id="remaining-term-load-{{ profile.pk }}">
+            </td>
+        </tr>
+        <script>
+            $( get_instructor_loads('{{ profile.pk }}') );
+        </script>
+    {% endfor %}
+    </table>
+</div>
+
+
+{% comment %}
+<div class="submit-row" >
+<input type="submit" value="{{ submit_button_label }}" class="default" name="_save" />
+</div>
+{% endcomment %}
+
+{# JavaScript for prepopulated fields #}
+{% prepopulated_fields_js %}
+
+
+
+</form>
+</div>
+{% endblock %}
+
+
+{# ########################################### #}

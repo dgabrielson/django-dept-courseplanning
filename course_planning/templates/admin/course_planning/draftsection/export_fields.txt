@@ -1,0 +1,8 @@
+course.label:Course
+verbose_name:Section
+real_section.crn:CRN
+get_semester_display:Term
+timeslot.get_day_display:Days:TBA
+timeslot.get_time_display_ascii:Time:TBA
+instructor:Instructor:TBA
+instructor.person.extra_data.intructor_id:Instructor ID

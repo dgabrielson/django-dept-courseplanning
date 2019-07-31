@@ -1,0 +1,4 @@
+django-dept-courseplanning
+===========================
+
+

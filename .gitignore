@@ -1,0 +1,14 @@
+venv/
+build/
+dist/
+test/
+__storage/
+
+.DS_Store
+
+
+
+*.pyc
+*~
+*.kate-swp
+*.egg-info

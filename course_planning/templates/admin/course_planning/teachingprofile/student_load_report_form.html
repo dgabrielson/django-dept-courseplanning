@@ -1,0 +1,152 @@
+{% extends 'admin/change_form.html' %}
+{% load i18n admin_urls static %}
+
+{# ########################################### #}
+
+{% block title %}Student Load Report{% endblock %}
+
+{# ########################################### #}
+
+{% block extrahead %}{{ block.super }}
+{{ form.media }}
+<script type="text/javascript" src="/static/admin/js/core.js"></script>
+{% endblock %}
+
+{# ########################################### #}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+<a href="{% url 'admin:index' %}">{% trans 'Home' %}</a>
+&rsaquo; <a href="{% url 'admin:app_list' app_label=opts.app_label %}">{{ opts.app_config.verbose_name }}</a>
+&rsaquo; <a href="{% url opts|admin_urlname:'changelist' %}">{{ opts.verbose_name_plural|capfirst }}</a>
+{% if original %}
+    &rsaquo; <a href="{{ original.admin_change_link }}">{{ original|truncatewords:"18" }}</a>
+{% endif %}
+&rsaquo; Student load report
+</div>
+{% endblock %}
+
+{# ########################################### #}
+
+{% block content %}
+<div id="content-main">
+{% block object-tools %}
+  <ul class="object-tools">
+    {% block object-tools-items %}
+    {% endblock %}
+  </ul>
+{% endblock %}
+<form action="" method="post" id="{{ opts.module_name }}_form">{% csrf_token %}{% block form_top %}{% endblock %}
+<div>
+{% if form.errors %}
+    <p class="errornote">
+    {% blocktrans count errors|length as counter %}Please correct the error below.{% plural %}Please correct the errors below.{% endblocktrans %}
+    </p>
+    {{ form.non_field_errors }}
+{% endif %}
+
+<fieldset class="module aligned ">
+
+<div class="form-row{% if form.fields|length_is:'1' and form.errors %} errors{% endif %}{% for field in form %} {{ field.name }}{% endfor %}">
+    {% if form.fields|length_is:'1' %}{{ form.errors }}{% endif %}
+    {% for field in form %}
+        <div><!-- {{ field.name }} -->
+            {{ field.errors }}
+            {% if field.is_checkbox %}
+                {{ field }}{{ field.label_tag }}
+            {% else %}
+                <label for="id_{{ field.name }}" class="required">{{ field.label }}</label>
+                {{ field }}
+            {% endif %}
+            {% if field.help_text %}
+                <p class="help">{{ field.help_text|safe }}</p>
+            {% endif %}
+        </div>
+    {% endfor %}
+</div>
+
+</fieldset>
+
+{% block after_field_sets %}{% endblock %}
+
+{% for inline_admin_formset in inline_admin_formsets %}
+    {% include inline_admin_formset.opts.template %}
+{% endfor %}
+
+{% block after_related_objects %}{% endblock %}
+
+<div class="submit-row" >
+
+{% if allow_download %}
+    <script>
+        function reload_page()
+        {
+            setTimeout(function() {
+                location.reload();
+            }, 100);
+        }
+    </script>
+    <a id="results-download-link" onclick="reload_page()" href="{% url 'admin:teachingprofile_student_load_report_download' %}">
+        Download the report
+    </a>
+{% else %}
+    <script>
+        function busy_action()
+        {
+            var btn = document.getElementById('show-busy-button');
+            var busy = document.getElementById('busy-throbber');
+
+            btn.style.display = "none";
+            busy.style.display = "block";
+        };
+    </script>
+    <input id="show-busy-button" onclick="busy_action();" type="submit" value="Generate report" class="default" name="_save">
+    <span id="busy-throbber" style="text-align:center;text-indent:0em;display:none"><img src="{% static 'img/busy-loader.gif' %}" alt="progress indicator"></span>
+{% endif %}
+</div>
+
+
+
+
+</div>
+</form>
+
+<h2>About the report</h2>
+
+<p>
+The generated report pulls enrollment data for all available terms
+in the given date range, and aggregates these numbers for each person
+with a teaching profile.
+</p>
+
+<p>
+    Each person gets an <em>average</em> and a <em>latest</em> enrolment
+    number.
+    <ul>
+        <li>
+            The <em>average</em> enrolment number is the average of all
+            available enrolment data for the time period starting three
+            weeks after classes begin and ending three weeks before classes
+            end.
+        </li>
+        <li>
+            The <em>latest</em> enrolment
+            number is the most recent available.  For past terms,
+            this should always be the enrolment after the VW deadline.
+            However, if the end data of the report includes the current
+            term, it will typically be the enrolment number from today.
+        </li>
+    </ul>
+</p>
+
+<p>
+    These enrolment numbers are for undergraduate courses (lecture and online sections) only.
+    Note that there is no distinction made between undergraduate
+    and graduate students in cross-listed courses.
+</p>
+
+</div>
+{% endblock %}
+
+
+{# ########################################### #}

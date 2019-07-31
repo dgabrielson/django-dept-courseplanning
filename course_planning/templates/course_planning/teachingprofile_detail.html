@@ -1,0 +1,98 @@
+{% extends 'course_planning/base.html' %}
+{% load static %}
+
+{# ########################################### #}
+
+
+{% block head_subtitle %}Teaching preferences{% endblock %}
+{% block title %}Teaching Preferences Summary{% endblock %}
+
+{# ########################################### #}
+
+{% block page_breadcrumbs %}
+    <span class="divider">&gt;</span>
+    Teaching preferences
+{% endblock page_breadcrumbs %}
+
+{# ########################################### #}
+
+{% block courseplanning_content %}
+    <ul class="pagenav">
+        <li>
+            <a href="{% url 'courseplanning-teaching-profile-wizard' %}">
+                Review and update my teaching preferences
+            </a>
+        </li>
+    </ul>
+
+    <ul>
+        <li>
+            {% if object.last_reviewed %}
+                You last reviewed your teaching preferences
+                {{ object.last_reviewed|timesince }} ago.
+            {% else %}
+                You have <strong>never</strong> reviewed your teaching
+                profile.  You should do this now.
+            {% endif %}
+        </li>
+
+        <li>
+            Agreed teaching load:
+            <strong>
+                {{object.agreed_load}}
+            </strong>
+            <ul>
+                {% for p in object.get_semesterteachingpreferences %}
+                    <li>
+                        {{ p.get_semester_display }}:
+                        <strong>
+                            {{p.preferred_load}}
+                        </strong>
+                    </li>
+                {% endfor %}
+            </ul>
+        </li>
+        {% if object.preference_same_day %}
+        <li>
+            You prefer all of your teaching on the same days, when you
+            teach more than one course.
+        </li>
+        {% endif %}
+        <li>
+            {% if object.preference_no_back_to_back %}
+                You prefer no back to back classes.
+            {% else %}
+                You are okay with back to back classes.
+            {% endif %}
+        </li>
+        <li>
+            Preferred top 3 courses:
+            <ul>
+                {% for p in object.get_favourite_coursepreferences|slice:":3" %}
+                    <li>
+                        {{ p.course }}
+                    </li>
+                {% endfor %}
+            </ul>
+        </li>
+        <li>
+            Preferred top 3 timeslots:
+            <ul>
+                {% for p in object.get_favourite_timeslotpreferences|slice:":3" %}
+                    <li>
+                        {{ p.timeslot.display }}
+                    </li>
+                {% endfor %}
+            </ul>
+        </li>
+
+    </ul>
+
+{% endblock %}
+
+{# ########################################### #}
+
+{% block courseplanning_extra_content %}
+{% endblock %}
+
+{# ########################################### #}

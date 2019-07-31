@@ -1,0 +1,33 @@
+{% extends 'site_base.html' %}
+
+{% block html_head %}
+{{ block.super }}
+{% block html_head_courseplanning_extra %}
+{% endblock %}
+{% endblock html_head %}
+
+
+{% block page_title %}{% block head_subtitle %}Program information{% endblock %}{% endblock %}
+{% block page_content_header %}{% block title %}Program information{% endblock %}{% endblock %}
+
+{% block breadcrumbs %}
+    {{ block.super }}
+    {% block app_breadcrumbs %}
+        <span class="divider">&gt;</span>
+        {% include './includes/app_breadcrumbs.html' %}
+        {% block page_breadcrumbs %}
+        {% endblock %}
+    {% endblock app_breadcrumbs %}
+{% endblock breadcrumbs %}
+
+{% block page_content_body %}
+    <section>
+        {% block courseplanning_content %}
+            <p>
+                MyApp Content.
+            </p>
+        {% endblock %}
+    </section>
+    {% block courseplanning_extra_content %}
+    {% endblock %}
+{% endblock page_content_body %}

@@ -1,0 +1,18 @@
+include requirements.txt
+include README.rst
+include LICENSE.txt
+
+# added by check_manifest.py
+recursive-include course_planning *.html
+
+# added by check_manifest.py
+recursive-include course_planning *.css
+
+# added by check_manifest.py
+recursive-include course_planning *.txt
+
+# added by check_manifest.py
+recursive-include course_planning *.tex
+
+# added by check_manifest.py
+recursive-include course_planning *.dot

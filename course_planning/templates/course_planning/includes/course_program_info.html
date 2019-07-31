@@ -1,0 +1,58 @@
+{# program.courseprograminfo_set.active #}
+
+{% regroup program.courseprograminfo_set.active by get_usual_year_display as program_year_list %}
+
+{% for year, course_program_info_list in program_year_list %}
+    {% if year != "Not applicable" %}<h3>{% if year != "Masters" and year != "PhD" %}Year {% endif %}{{ year }} courses</h3>{% endif %}
+    <table class="program-table">
+        <thead>
+            <tr>
+                <th class="course-label" scope="col">Course</th>
+                <th class="course-name" scope="col">Name</th>
+                <th scope="col">Lab?</th>
+                <th class="align-center" scope="colgroup" colspan="3">Terms</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for object in course_program_info_list %}
+                {% with course=object.course %}
+                    <tr class="constraint-{{ object.constraint }}"{% if object.constraint == "r" or object.constraint == "c" %} title="This course is {{ object.get_constraint_display|lower }}"{% endif %}>
+                        <td class="course course-label">
+                            <a href="{{ course.course.get_absolute_url }}">
+                                {{ course.course.label_nbsp }}
+                            </a>
+                        </td>
+                        <td class="course course-name">
+                            {{ course.course.name }}
+                        </td>
+                            {% if course.has_lab %}
+                                <td class="has-lab">L</td>
+                            {% else %}
+                                <td></td>
+                            {% endif %}
+                        </td>
+                        {% if course.runs == 'i' %}
+                            <td colspan="3">irregular</td>
+                        {% else %}
+                            {% if course.fall %}
+                                <td class="runs-{% if course.runs != 'a' %}{{ course.runs|title }}{% endif %}F">{% if course.runs != 'a' %}{{ course.runs|title }}{% endif %}F</td>
+                            {% else %}
+                                <td></td>
+                            {% endif %}
+                            {% if course.winter %}
+                                <td class="runs-{% if course.runs != 'a' %}{{ course.runs|title }}{% endif %}W">{% if course.runs != 'a' %}{{ course.runs|title }}{% endif %}W</td>
+                            {% else %}
+                                <td></td>
+                            {% endif %}
+                            {% if course.summer %}
+                                <td class="runs-{% if course.runs != 'a' %}{{ course.runs|title }}{% endif %}S">{% if course.runs != 'a' %}{{ course.runs|title }}{% endif %}S</td>
+                            {% else %}
+                                <td></td>
+                            {% endif %}
+                        {% endif %}
+                    </tr>
+                {% endwith %}
+            {% endfor %}
+        </tbody>
+    </table>
+{% endfor %}

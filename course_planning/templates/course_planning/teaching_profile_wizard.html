@@ -1,0 +1,140 @@
+{% extends 'course_planning/teachingprofile_detail.html' %}
+
+{# ########################################### #}
+
+{% block head_subtitle %}Teaching preferences{% endblock %}
+{% block title %}Teaching Preferences Update{% endblock %}
+
+{# ########################################### #}
+
+{% block html_head_courseplanning_extra %}
+{{ block.super }}
+{{ wizard.form.media }}
+{% endblock %}
+
+{# ########################################### #}
+{% block courseplanning_content %}
+    {% if form_title %}<h3>{{ form_title }}</h3>{% endif %}
+
+    <p>
+        <strong>Note:</strong>
+        Indicated preferences are considered for teaching assignments
+        but may not always be honoured.
+    </p>
+
+
+    <form enctype="multipart/form-data" action="" method="post" class="form">
+        {% csrf_token %}
+        <table class="table-form">
+            {{ wizard.management_form }}
+            {% if wizard.form.forms %}{# formset #}
+                {{ wizard.form.management_form }}
+                {% if wizard.form.non_form_errors %}
+                    {{ wizard.form.non_form_errors }}
+                {% endif %}
+                {% for form in wizard.form.forms %}
+                    {# custom formset templates #}
+                    {% if formset_label %}
+                        {% if formset_label == 'semester' %}
+                            {% include './includes/formset/single_line_form.html' with form=form form_label=form.instance.get_semester_display %}
+                        {% elif formset_label == 'course' %}
+                            {% include './includes/formset/single_line_form.html' with form=form form_label=form.instance.course.label help_text=form.instance.course.name %}
+                        {% elif formset_label == 'timeslot' %}
+                            {% include './includes/formset/single_line_form.html' with form=form form_label=form.instance.timeslot.display %}
+                        {% elif formset_label == 'question' %}
+                            {% include './includes/formset/question_form.html' with form=form form_label=form.instance.question %}
+                        {% else %}
+                            {% include './includes/formset/single_line_form.html' with form=form form_label='UNKNOWN' %}
+                        {% endif %}
+                    {% else %}
+                        {% include 'includes/form.html' %}
+                    {% endif %}
+                {% endfor %}
+            {% else %}
+                {% include 'includes/form.html' with form=wizard.form %}
+            {% endif %}
+            <tfoot>
+            <tr class="visual-break form-row wizard-ctl">
+                <td class="left">
+                    {% if wizard.steps.prev %}
+                    <button class="wizard-prev" name="wizard_goto_step" type="submit" value="{{ wizard.steps.first }}">Start over</button>
+                    {% endif %}
+                </td>
+                <td class="right">
+                    <input class="wizard-next" type="submit" value="{% block form_button %}{% if wizard.steps.next %}Next{% else %}DONE{% endif %}{% endblock %}">
+                </td>
+            </tr>
+            </tfoot>
+        </table>
+    </form>
+{% endblock %}
+
+{# ########################################### #}
+
+{% block courseplanning_extra_content %}
+    {% if formset_label == 'semester' %}
+        <p class="instructions">
+            Enter your preferred teaching load distribution
+            for each term.
+            You may use decimal points to indicate the relative
+            strength of your preferences.
+        </p>
+        <p class="instructions example">
+            <strong>Example 1:</strong>
+            Fall 1.5; Winter 1.5 means you need to teach 3 courses,
+            but you have no preference for which term the extra
+            course occurs in.
+        </p>
+        <p class="instructions example">
+            <strong>Example 2:</strong>
+            Fall 1.25; Winter 1.75 means you need to teach 3 courses,
+            but you have a stronger preference for the extra
+            course in the winter term.
+        </p>
+        <p class="instructions example">
+            <strong>Example 3:</strong>
+            Fall 3; Winter 2 means you need to teach 5 courses,
+            and your strong preference is for three in the fall
+            and 2 in the winter.
+        </p>
+        <p class="instructions">
+            <em>In all cases</em>
+            your total must match the agreed load in the previous step.
+        </p>
+    {% elif formset_label == 'course' %}
+        <p class="instructions">
+            Indicate your teaching preference for the given courses on
+            a scale of 0 to 9.
+
+            <dl>
+                <dt>0</dt>
+                <dd>Indicates you are not qualified to teach the course.</dd>
+                <dt>1&mdash;3</dt>
+                <dd>Indicates you would prefer not to teach the course.</dd>
+                <dt>4&mdash;6</dt>
+                <dd>Indicates you are willing to teach the course, but it is not a preference.</dd>
+                <dt>7&mdash;9</dt>
+                <dd>Indicates a preferred course.</dd>
+            </dl>
+        </p>
+    {% elif formset_label == 'timeslot' %}
+        <p class="instructions">
+            Indicate your teaching preference for the given timeslots on
+            a scale of 0 to 9.
+
+            <dl>
+                <dt>0</dt>
+                <dd>Indicates you are unable to teach at the specified time.</dd>
+                <dt>1&mdash;3</dt>
+                <dd>Indicates you would prefer not to teach in the given timeslot.</dd>
+                <dt>4&mdash;6</dt>
+                <dd>Indicates you are willing to teach at that time, but it is not a preference.</dd>
+                <dt>7&mdash;9</dt>
+                <dd>Indicates a preferred timeslot.</dd>
+            </dl>
+        </p>
+    {% elif formset_label == 'question' %}
+    {% endif %}
+{% endblock %}
+
+{# ########################################### #}

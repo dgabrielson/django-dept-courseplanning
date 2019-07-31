@@ -1,0 +1,153 @@
+{% extends 'admin/change_form.html' %}
+{% load i18n admin_urls static %}
+
+{% block extrahead %}{{ block.super }}
+<script type="text/javascript" src="{% static 'js/jquery-3.2.1.min.js' %}"></script>
+
+<style>
+a.showhide-action:hover {
+    cursor:pointer;
+}
+
+span.teaching-load {
+    color: #666;
+}
+</style>
+
+{% endblock %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+<a href="{% url 'admin:index' %}">{% trans 'Home' %}</a>
+&rsaquo; <a href="{% url 'admin:app_list' app_label=opts.app_label %}">{{ opts.app_config.verbose_name }}</a>
+&rsaquo; <a href="{% url opts|admin_urlname:'changelist' %}">{{ opts.verbose_name_plural|capfirst }}</a>
+{% if original %}
+    &rsaquo; <a href="{{ original.admin_change_link }}">{{ original|truncatewords:"18" }}</a>
+{% endif %}
+&rsaquo; Summary report
+</div>
+{% endblock %}
+
+
+{% block content %}
+<h1>{{ page_header }}</h1>
+<div id="content-main">
+{% block object-tools %}
+  <ul class="object-tools">
+    {% block object-tools-items %}
+    {% endblock %}
+  </ul>
+{% endblock %}
+
+<!-- main content -->
+
+{% for profile in teachingprofile_list %}
+    <h2>
+        {{ profile }}
+        <span class="teaching-load">
+            &mdash;
+            Load: {{ profile.agreed_load }}
+            &mdash;
+            {% for p in profile.semesterteachingpreference_set.all %}
+                {{ p.get_semester_display }}: {{ p.preferred_load }}
+                {% if not forloop.last %} / {% endif %}
+            {% endfor %}
+        </span>
+    </h2>
+    <p>
+        Top courses:
+        {% with course_list=profile.get_favourite_coursepreferences %}
+            {% for p in course_list|slice:":6" %}
+                {{ p.course.label }}
+                    [{{ p.score }}]
+                    {% if not forloop.last %} &nbsp; {% endif %}
+            {% endfor %}
+            {% if course_list|length > 6 %}
+                <span id="profile-{{ profile.pk }}-more-courses" style="display:none;">
+                    {% for p in course_list|slice:"6:" %}
+                        &nbsp;
+                        {{ p.course.label }}
+                        [{{ p.score }}]
+                    {% endfor %}
+                </span>
+                &nbsp;
+                <a class="showhide-action" id="profile-{{ profile.pk }}-show-moreless-courses">[+]</a>
+                <script>
+                    $('#profile-{{ profile.pk }}-show-moreless-courses').click(function() {
+                        if ($(this).text() == '[+]') {
+                            $(this).text('[-]');
+                        } else {
+                            $(this).text('[+]');
+                        }
+                        $('#profile-{{ profile.pk }}-more-courses').toggle("fast");
+                    });
+                </script>
+            {% endif %}
+        {% endwith %}
+
+    </p>
+    <p>
+        Top timeslots:
+        {% with timeslot_list=profile.get_favourite_timeslotpreferences %}
+            {% for p in timeslot_list|slice:":4" %}
+                {{ p.timeslot.display }}
+                [{{ p.score }}]
+                {% if not forloop.last %} &nbsp; {% endif %}
+            {% endfor %}
+            {% if timeslot_list|length > 4 %}
+                <span id="profile-{{ profile.pk }}-more-timeslots" style="display:none;">
+                    {% for p in timeslot_list|slice:"4:" %}
+                        &nbsp;
+                        {{ p.timeslot.display }}
+                        [{{ p.score }}]
+                    {% endfor %}
+                </span>
+                &nbsp;
+                <a class="showhide-action" id="profile-{{ profile.pk }}-show-moreless-timeslots">[+]</a>
+                <script>
+                    $('#profile-{{ profile.pk }}-show-moreless-timeslots').click(function() {
+                        if ($(this).text() == '[+]') {
+                            $(this).text('[-]');
+                        } else {
+                            $(this).text('[+]');
+                        }
+                        $('#profile-{{ profile.pk }}-more-timeslots').toggle("fast");
+                    });
+                </script>
+            {% endif %}
+        {% endwith %}
+    </p>
+    <div style="margin-left:2.5em">
+        {% for answer in profile.teachingsurveyanswer_set.all %}
+            {% if answer.answer %}
+                <span id="answer-{{ answer.pk }}-qtext">
+                    <a class="showhide-action" id="answer-{{ answer.pk }}-ctl">
+                        Answer to Q{{ answer.question_id }}
+                    </a>
+                </span>
+                <p style="text-indent:-1em;display:none" id="answer-{{ answer.pk }}">
+                    <strong>
+                        <a class="showhide-action" id="answer-{{ answer.pk }}-qactual">
+                            {{ answer.question }}
+                        </a>
+                    </strong><br>
+                    {{ answer.answer }}
+                </p>
+                <script>
+                    $('#answer-{{ answer.pk }}-ctl').click(function() {
+                        $('#answer-{{ answer.pk }}-qtext').hide();
+                        $('#answer-{{ answer.pk }}').show("fast");
+                    });
+                    $('#answer-{{ answer.pk }}-qactual').click(function() {
+                        $('#answer-{{ answer.pk }}').hide();
+                        $('#answer-{{ answer.pk }}-qtext').show("fast");
+                    });
+
+                </script>
+            {% endif %}
+        {% endfor %}
+    </div>
+{% endfor %}
+
+</div>
+{% endblock content %}
